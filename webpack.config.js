@@ -11,7 +11,7 @@ var webpackConfig = {
     contentBase: __dirname,
   },
   output: {
-    filename: "spider.js",
+    filename: "bundle.js",
     path: path.join(path.resolve(__dirname), "/dist"),
     library: "[name]",
     libraryTarget: "umd",
