@@ -47,15 +47,14 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 	
 	//If the supplied maxValue is smaller than the actual one, replace by the max in the data
 	let maxValue = cfg.domainMax ? Math.max(cfg.domainMax, max(data, function(i){return max(i.map(function(o){return o.value;}))})) : max(data, function(i){return max(i.map(function(o){return o.value;}))});
-
-	let deterSide = Math.min(cfg.w, cfg.h);
-	let allAxis = (data.map(function(i, j){console.log({i, j});return i[j].axis})),	//Names of each axis
+		let deterSide = Math.min(cfg.w, cfg.h);
+	let allAxis = (data.map(function(i, j){return i[j].axis})),	//Names of each axis
 		total = allAxis.length,					//The number of different axes
 		radius = Math.min(deterSide*.35, cfg.legendSide === 'center' ? deterSide*.3 : deterSide*.45), 	//Radius of the outermost circle
 		Format = format(",.0f"),			 	//Label formatting
 		angleSlice = Math.PI * 2 / total;		//The width in radians of each "slice"
-	console.log({allAxis, data})
-	//Scale for the radius
+
+		//Scale for the radius
 	let rScale = [];
 	let axesMax = []
   	if (cfg.independent) {
@@ -820,12 +819,9 @@ const visObject = {
 
     let series_default = ["#4A80BC", "#615894", "#F0C733", "#D13452", "#E48522", "#B977A9", "#7bc739", "#92b3d7", "#e38597"];
 
-	let series = [];
 	let originalData = data;
-	let moreData = [];
 	let formattedData = [];
 	let axes = [];
-	let values = [];
 
     if (queryResponse['pivots']) {
 	    // grab the series labels
@@ -855,7 +851,6 @@ const visObject = {
 	    queryResponse['pivots'].forEach(function(d) {
 	      series.push(d['key']);
 	    });
-	    originalData = data;
 	    // format the data
 	    // get measure-like field names and label
 	    queryResponse['fields']['measure_like'].forEach(function(d) {
@@ -866,7 +861,7 @@ const visObject = {
 	    });
 	    
 	    series.forEach(function(s, index) {
-	     l//et values = [];
+	     let values = [];
 	      axes.forEach(function(a) {
 	        values.push({
 	          axis: a['label'],
@@ -876,7 +871,8 @@ const visObject = {
 	          links: data[0][a['name']][s]['links']
 	        });
 	      });
-	      set = [];
+	      let set = [];
+		  let moreData = [];
 	      values.forEach(function(v) {
 	        set.push(v);
 	      });
@@ -886,10 +882,9 @@ const visObject = {
 	        color: index < 9 ? series_default[index] : lighten("#D13452", index*1.7)
 	      });
 	      formattedData.push(set);
-		  //console.log({formattedData})
 	    });
 	} else {
-		series = [];
+		let series = [];
 		if (!(queryResponse['fields']['measure_like'].length % 2) && config.negatives) {
 	    	console.log("troof");
 	      this.addError({
@@ -912,7 +907,6 @@ const visObject = {
 	      });
 	      return;
 	    }
-		// originalData = data;
 		//console.log(queryResponse['fields']['measure_like']);
 		let qrn = queryResponse["fields"]["dimensions"][0].name;
 	    queryResponse['fields']['measure_like'].forEach(function(d) {
@@ -921,8 +915,8 @@ const visObject = {
 	        label: d['label_short'] ? d['label_short'].trim() : d['label'].trim()
 	      });
 	    });
-	   // let formattedData = [];
-	    //let moreData = [];
+	    let moreData = [];
+		let values = [];
 		data.forEach(function(d, index) {
 			// let values = []
 			axes.forEach(function(a) {
@@ -948,10 +942,9 @@ const visObject = {
 		});
 		series = moreData.map(s => s.label);
 	}
-	//console.log(formattedData);
-	//console.log(moreData);
 	//color: index < 9 ? series_default[index] : lighten("#D13452", index*1.7),
-   let opt = Object.assign({}, baseOptions)
+   	let opt = Object.assign({}, baseOptions)
+	let moreData = []; 
 
     moreData.forEach(function(s, index) {
 	    opt[`${s.label}_color`] = {
