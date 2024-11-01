@@ -47,7 +47,7 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 	
 	//If the supplied maxValue is smaller than the actual one, replace by the max in the data
 	let maxValue = cfg.domainMax ? Math.max(cfg.domainMax, max(data, function(i){return max(i.map(function(o){return o.value;}))})) : max(data, function(i){return max(i.map(function(o){return o.value;}))});
-		let deterSide = Math.min(cfg.w, cfg.h);
+	let deterSide = Math.min(cfg.w, cfg.h);
 	let allAxis = (data.map(function(i, j){return i[j].axis})),	//Names of each axis
 		total = allAxis.length,					//The number of different axes
 		radius = Math.min(deterSide*.35, cfg.legendSide === 'center' ? deterSide*.3 : deterSide*.45), 	//Radius of the outermost circle
@@ -247,6 +247,7 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 		    .style("fill-opacity", cfg.opacityCircles)
 		    .style("filter" , "url(#glow)");
   	} else {
+		let levels = [];
   		if (cfg.independent) {
   			levels = []
 		    axisGrid.selectAll(".axisLabel").forEach(function(d) {
@@ -382,7 +383,7 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 		.enter().append("circle")
 		.attr("class", "radarCircle")
 		.attr("r", cfg.dotRadius)
-		.attr("cx", function(d,i){ 
+		.attr("cx", function(d,i){
     		return rScale[i](cfg.negatives ? (d.value < 0 ? d.value*cfg.negativeR : d.value) : (d.value < 0 ? 0 : d.value)) * Math.cos(angleSlice*i - Math.PI/2); 
   		})
 		.attr("cy", function(d,i){ 
@@ -418,8 +419,8 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 		.style("fill", "none")
    		.style("pointer-events", "all")
 		.on("mouseover", function(d,i) {
-			newX =  parseFloat(select(this).attr('cx')) - 10;
-			newY =  parseFloat(select(this).attr('cy')) - 10;
+			const newX =  parseFloat(select(this).attr('cx')) - 10;
+			const newY =  parseFloat(select(this).attr('cy')) - 10;
 	    	selectAll(".radarArea")
 				.transition().duration(200)
 				.style("fill-opacity", 0.1); 
@@ -503,7 +504,7 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 	        toggleDataPoints(points);
 	        const legendCell = select(this);
 	        legendCell.classed('hidden', !legendCell.classed('hidden'));  // toggle opacity of legend item
-	      	series_sel = select(`#v${d}`)[0][0].classList.contains('hidden');
+	      	let series_sel = select(`#v${d}`)[0][0].classList.contains('hidden');
 	      	if (series_sel) {
 	          select(`#v${d}`).style("opacity", "0").style("pointer-events","none");
 	          selectAll(`[child_id=v${d}]`).style("pointer-events","none");
@@ -526,10 +527,10 @@ function RadarChart(id, data, options, moreData, colorSeries, originalData, axes
 
     //console.log(select('.legendCells').node().getBBox().width);
     if (cfg.legendSide == 'center') {
-    	wid = window.innerWidth/2 - select('.legendCells').node().getBBox().width/2 + cfg.margin.left;
+    	const wid = window.innerWidth/2 - select('.legendCells').node().getBBox().width/2 + cfg.margin.left;
     	select(".legendOrdinal").attr("transform", function(d) { return `translate(${wid},${legy})`});
     } else if (cfg.legendSide == 'right') {
-    	wid = window.innerWidth - select('.legendCells').node().getBBox().width*1.25;
+    	const wid = window.innerWidth - select('.legendCells').node().getBBox().width*1.25;
     	select(".legendOrdinal").attr("transform", function(d) { return `translate(${wid},${legy})`});
     } else {
     	select(".legendOrdinal").attr("transform", function(d) { return `translate(${legx},${legy})`});
@@ -822,6 +823,8 @@ const visObject = {
 	let originalData = data;
 	let formattedData = [];
 	let axes = [];
+	let moreData = [];
+	let series = [], values = [], set = [];
 
     if (queryResponse['pivots']) {
 	    // grab the series labels
@@ -861,7 +864,6 @@ const visObject = {
 	    });
 	    
 	    series.forEach(function(s, index) {
-	     let values = [];
 	      axes.forEach(function(a) {
 	        values.push({
 	          axis: a['label'],
@@ -871,8 +873,6 @@ const visObject = {
 	          links: data[0][a['name']][s]['links']
 	        });
 	      });
-	      let set = [];
-		  let moreData = [];
 	      values.forEach(function(v) {
 	        set.push(v);
 	      });
@@ -884,7 +884,6 @@ const visObject = {
 	      formattedData.push(set);
 	    });
 	} else {
-		let series = [];
 		if (!(queryResponse['fields']['measure_like'].length % 2) && config.negatives) {
 	    	console.log("troof");
 	      this.addError({
@@ -915,10 +914,7 @@ const visObject = {
 	        label: d['label_short'] ? d['label_short'].trim() : d['label'].trim()
 	      });
 	    });
-	    let moreData = [];
-		let values = [];
 		data.forEach(function(d, index) {
-			// let values = []
 			axes.forEach(function(a) {
 				values.push({
 		          axis: a['label'],
@@ -928,7 +924,6 @@ const visObject = {
 		          links: d[a['name']]['links']
 		        });
 			});
-			let set = [];
 	        values.forEach(function(v) {
 	          set.push(v);
 	        });
@@ -944,7 +939,6 @@ const visObject = {
 	}
 	//color: index < 9 ? series_default[index] : lighten("#D13452", index*1.7),
    	let opt = Object.assign({}, baseOptions)
-	let moreData = []; 
 
     moreData.forEach(function(s, index) {
 	    opt[`${s.label}_color`] = {
