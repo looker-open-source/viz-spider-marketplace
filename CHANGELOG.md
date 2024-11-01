@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/looker-open-source/viz-spider-marketplace/compare/v1.0.0...v1.0.1) (2024-11-01)
+
+
+### Bug Fixes
+
+* Vulnerability from json5 dependency ([#30](https://github.com/looker-open-source/viz-spider-marketplace/issues/30)) ([f87173b](https://github.com/looker-open-source/viz-spider-marketplace/commit/f87173b3f4a9475983de9f74be11ad00f2967312))
+
 ## 1.0.0 (2024-09-17)
 
 
