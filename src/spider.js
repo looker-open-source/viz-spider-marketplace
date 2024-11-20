@@ -822,9 +822,7 @@ const visObject = {
 
 	let originalData = data;
 	let formattedData = [];
-	let axes = [];
-	let moreData = [];
-	let series = [], values = [], set = [];
+	let axes = [], moreData = [];
 
     if (queryResponse['pivots']) {
 	    // grab the series labels
@@ -864,6 +862,7 @@ const visObject = {
 	    });
 	    
 	    series.forEach(function(s, index) {
+	     let values = [];
 	      axes.forEach(function(a) {
 	        values.push({
 	          axis: a['label'],
@@ -873,6 +872,8 @@ const visObject = {
 	          links: data[0][a['name']][s]['links']
 	        });
 	      });
+	      let set = [];
+		  	moreData = [];
 	      values.forEach(function(v) {
 	        set.push(v);
 	      });
@@ -884,6 +885,7 @@ const visObject = {
 	      formattedData.push(set);
 	    });
 	} else {
+		let series = [];
 		if (!(queryResponse['fields']['measure_like'].length % 2) && config.negatives) {
 	    	console.log("troof");
 	      this.addError({
@@ -914,7 +916,10 @@ const visObject = {
 	        label: d['label_short'] ? d['label_short'].trim() : d['label'].trim()
 	      });
 	    });
+	  moreData = [];
+		let values = [];
 		data.forEach(function(d, index) {
+			// let values = []
 			axes.forEach(function(a) {
 				values.push({
 		          axis: a['label'],
@@ -924,6 +929,7 @@ const visObject = {
 		          links: d[a['name']]['links']
 		        });
 			});
+			let set = [];
 	        values.forEach(function(v) {
 	          set.push(v);
 	        });
@@ -938,7 +944,7 @@ const visObject = {
 		series = moreData.map(s => s.label);
 	}
 	//color: index < 9 ? series_default[index] : lighten("#D13452", index*1.7),
-   	let opt = Object.assign({}, baseOptions)
+   	let opt = Object.assign({}, baseOptions) 
 
     moreData.forEach(function(s, index) {
 	    opt[`${s.label}_color`] = {
