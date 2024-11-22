@@ -76,10 +76,10 @@ function RadarChart(
         );
       });
   let deterSide = Math.min(cfg.w, cfg.h);
-  let allAxis = data.map(function (i, j) {
-      return i[j].axis;
-    }), //Names of each axis
-    total = allAxis.length, //The number of different axes
+	let allAxis = data[0].map(function (i, j) {
+    return i.axis;
+  }); //Names of each axis
+  let total = allAxis.length, //The number of different axes
     radius = Math.min(
       deterSide * 0.35,
       cfg.legendSide === "center" ? deterSide * 0.3 : deterSide * 0.45
@@ -533,7 +533,6 @@ function RadarChart(
     })
     .style("fill", "none")
     .style("filter", "url(#glow)");
-
   //Append the circles
   blobWrapper
     .selectAll(".radarCircle")
@@ -716,6 +715,8 @@ function RadarChart(
     .scale(ordinal)
     .orient(leg_orient)
     .on("cellclick", function (d) {
+			console.log('cellClick')
+			console.log(d)
       let points = d.replace(/[^A-Z0-9]+/gi, "");
       toggleDataPoints(points);
       const legendCell = select(this);
@@ -998,14 +999,7 @@ const visObject = {
    * UpdateAsync is the function that gets called (potentially) multiple times. It receives
    * the data and should update the visualization with the new data.
    **/
-  updateAsync: function (
-    data,
-    element,
-    config,
-    queryResponse,
-    details,
-    doneRendering
-  ) {
+  updateAsync: function (data, element, config, queryResponse, details, doneRendering) {
     if (data.length < 1) {
       this.addError({
         title: "No results.",
@@ -1065,16 +1059,13 @@ const visObject = {
 
     let originalData = data;
     let formattedData = [];
-    let axes = [],
-      moreData = [];
+    let axes = [], moreData = [];
 
     if (queryResponse["pivots"]) {
       // grab the series labels
       //console.log(queryResponse['fields']['measure_like'].length % 2);
-      if (
-        !(queryResponse["fields"]["measure_like"].length % 2) &&
-        config.negatives
-      ) {
+			let series = [];
+      if (!(queryResponse["fields"]["measure_like"].length % 2) && config.negatives) {
         //console.log("troof");
         this.addError({
           title: "Can't display negatives with symmetric axes.",
@@ -1135,11 +1126,7 @@ const visObject = {
         formattedData.push(set);
       });
     } else {
-      let series = [];
-      if (
-        !(queryResponse["fields"]["measure_like"].length % 2) &&
-        config.negatives
-      ) {
+      if (!(queryResponse["fields"]["measure_like"].length % 2) && config.negatives) {
         console.log("troof");
         this.addError({
           title: "Can't display negatives with symmetric axes.",
@@ -1161,8 +1148,9 @@ const visObject = {
         });
         return;
       }
-      //console.log(queryResponse['fields']['measure_like']);
+      
       let qrn = queryResponse["fields"]["dimensions"][0].name;
+			axes = [];
       queryResponse["fields"]["measure_like"].forEach(function (d) {
         axes.push({
           name: d["name"],
@@ -1170,9 +1158,8 @@ const visObject = {
         });
       });
       moreData = [];
-      let values = [];
       data.forEach(function (d, index) {
-        // let values = []
+        let values = []
         axes.forEach(function (a) {
           values.push({
             axis: a["label"],
