@@ -5,6 +5,7 @@
  *  - Example Visualizations - https://github.com/looker/custom_visualizations_v2/tree/master/src/examples
  **/
 import {scaleLinear, max, format, select, range, svg, selectAll, scaleOrdinal, schemeCategory10, lineRadial, symbol, symbolCircle } from 'd3';
+import * as d3 from 'd3';
 import { legendColor } from 'd3-svg-legend';
 
 function RadarChart(
@@ -181,11 +182,9 @@ function RadarChart(
   //Wrapper for the grid & axes
   let axisGrid = g.append("g").attr("class", "axisWrapper");
 
-  //console.log(d3.range(1,(cfg.levels+1)).reverse());
   //Text indicating at what % each level is
   if (cfg.independent) {
     allAxis.forEach(function (d, i) {
-      console.log({ d, i });
       range(1, cfg.levels + 1)
         .reverse()
         .forEach(function (dd, ii) {
@@ -237,7 +236,6 @@ function RadarChart(
   //////////////////// Draw the axes //////////////////////
   /////////////////////////////////////////////////////////
   let negativeR = 1;
-  //console.log(total);
   if (cfg.roundStrokes) {
     negativeR = 1;
   } else if (total == 3) {
@@ -251,7 +249,6 @@ function RadarChart(
   } else if (total == 11) {
     negativeR = 0.96;
   }
-  //console.log(negativeR);
   //Create the straight lines radiating outward from the center
   let axis = axisGrid
     .selectAll(".axis")
@@ -345,6 +342,8 @@ function RadarChart(
     })
     .call(wrap, cfg.wrapWidth);
 
+    let levels = [];
+    let s;
   //Draw the background circles
   if (cfg.roundStrokes) {
     axisGrid
@@ -365,9 +364,9 @@ function RadarChart(
       .style("fill-opacity", cfg.opacityCircles)
       .style("filter", "url(#glow)");
   } else {
-    let levels = [];
+    // let levels = [];
     if (cfg.independent) {
-      levels = [];
+      // levels = [];
       axisGrid.selectAll(".axisLabel").forEach(function (d) {
         s = d.length;
         let n = s / total;
@@ -385,9 +384,7 @@ function RadarChart(
           levels.push(set);
         });
       });
-      // console.log(levels);
       levels.forEach(function (d) {
-        //console.log(d);
         axisGrid
           .selectAll(".levels")
           .data([d])
@@ -411,7 +408,7 @@ function RadarChart(
           .style("filter", "url(#glow)");
       });
     } else {
-      levels = [];
+      //levels = [];
       axisGrid.selectAll(".axisLabel").forEach(function (d) {
         s = d.length;
         d.forEach(function (d) {
@@ -428,9 +425,7 @@ function RadarChart(
           levels.push(set);
         });
       });
-      // console.log(levels);
       levels.forEach(function (d) {
-        //console.log(d);
         axisGrid
           .selectAll(".levels")
           .data([d])
@@ -461,8 +456,11 @@ function RadarChart(
   /////////////////////////////////////////////////////////
 
   //The radial line function
-  let radarLine = lineRadial()
-    .curve("linear-closed")
+  let radarLine = d3.lineRadial()
+    //.curve(d3.curveLinearClosed)
+    .angle(function (d, i) {
+      return i * angleSlice;
+    })
     .radius(function (d, i) {
       return rScale[i](
         cfg.negatives
@@ -474,12 +472,9 @@ function RadarChart(
           : d.value
       );
     })
-    .angle(function (d, i) {
-      return i * angleSlice;
-    });
 
   if (cfg.roundStrokes) {
-    radarLine.curve("cardinal-closed");
+    radarLine.curve(d3.curveCardinalClosed);
   }
 
   //Create a wrapper for the blobs
@@ -493,14 +488,14 @@ function RadarChart(
       return "v" + moreData[i].label.replace(/[^A-Z0-9]+/gi, "");
     });
 
-  //Append the backgrounds
+    //Append the backgrounds
   blobWrapper
     .append("path")
     .attr("class", "radarArea")
     .attr("id", function (d, i) {
       return "v" + moreData[i].label.replace(/[^A-Z0-9]+/gi, "");
     })
-    // .attr("d", function(d,i) { console.log({d, i}); return radarLine(data[i].value); })
+    .attr("d", function(d,i) { return radarLine(data[i]) })
     .style("fill", function (d, i) {
       return cfg.color(i);
     })
@@ -526,7 +521,7 @@ function RadarChart(
   blobWrapper
     .append("path")
     .attr("class", "radarStroke")
-    // .attr("d", function(d,i) { return radarLine(data[i].value); })
+    .attr("d", function(d,i) { return radarLine(data[i]); })
     .style("stroke-width", cfg.strokeWidth + "px")
     .style("stroke", function (d, i) {
       return cfg.color(i);
@@ -631,8 +626,8 @@ function RadarChart(
     .style("fill", "none")
     .style("pointer-events", "all")
     .on("mouseover", function (d, i) {
-      const newX = parseFloat(select(this).attr("cx")) - 10;
-      const newY = parseFloat(select(this).attr("cy")) - 10;
+      let newX = parseFloat(select(this).attr("cx")) - 10;
+      let newY = parseFloat(select(this).attr("cy")) - 10;
       selectAll(".radarArea")
         .transition()
         .duration(200)
@@ -715,8 +710,6 @@ function RadarChart(
     .scale(ordinal)
     .orient(leg_orient)
     .on("cellclick", function (d) {
-			console.log('cellClick')
-			console.log(d)
       let points = d.replace(/[^A-Z0-9]+/gi, "");
       toggleDataPoints(points);
       const legendCell = select(this);
@@ -741,9 +734,9 @@ function RadarChart(
 
   _svg.select(".legendOrdinal").call(legendOrdinal);
 
-  //console.log(select('.legendCells').node().getBBox().width);
+  let wid; 
   if (cfg.legendSide == "center") {
-    const wid =
+    wid =
       window.innerWidth / 2 -
       select(".legendCells").node().getBBox().width / 2 +
       cfg.margin.left;
@@ -751,7 +744,7 @@ function RadarChart(
       return `translate(${wid},${legy})`;
     });
   } else if (cfg.legendSide == "right") {
-    const wid =
+    wid =
       window.innerWidth - select(".legendCells").node().getBBox().width * 1.25;
     select(".legendOrdinal").attr("transform", function (d) {
       return `translate(${wid},${legy})`;
@@ -1032,8 +1025,6 @@ const visObject = {
       width = element.clientWidth,
       height = element.clientHeight;
 
-    //console.log(data);
-
     // append the svg object to the body of the page
     // append a 'group' element to 'svg'
     // moves the 'group' element to the top left margin
@@ -1060,11 +1051,10 @@ const visObject = {
     let originalData = data;
     let formattedData = [];
     let axes = [], moreData = [];
+    let series = [];
 
     if (queryResponse["pivots"]) {
       // grab the series labels
-      //console.log(queryResponse['fields']['measure_like'].length % 2);
-			let series = [];
       if (!(queryResponse["fields"]["measure_like"].length % 2) && config.negatives) {
         //console.log("troof");
         this.addError({
@@ -1182,7 +1172,6 @@ const visObject = {
             index < 9 ? series_default[index] : lighten("#D13452", index * 1.7),
         });
         formattedData.push(set);
-        //console.log({formattedData})
       });
       series = moreData.map((s) => s.label);
     }
