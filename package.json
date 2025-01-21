@@ -36,7 +36,7 @@
     "ssf": "^0.10.2",
     "styled-components": "6.1.8",
     "to-string-loader": "^1.1.5",
-    "uglifyjs-webpack-plugin": "^2.2.0",
+    "terser-webpack-plugin": "^5.3.10",
     "webpack": "^5.96.1",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.1.0"
