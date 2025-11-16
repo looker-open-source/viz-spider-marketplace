@@ -26,7 +26,7 @@
     "eslint": "^6.3.0",
     "eslint-config-prettier": "^6.2.0",
     "eslint-plugin-react": "^7.14.3",
-    "js-yaml": "~3.13.1",
+    "js-yaml": "~4.1.1",
     "jsdom": "^11.11.0",
     "json5": "^2.2.2",
     "lodash": "^4.17.19",
@@ -42,7 +42,7 @@
     "webpack-dev-server": "^5.2.1"
   },
   "resolutions": {
-    "js-yaml": "3.13.1",
+    "js-yaml": "4.1.1",
     "json5": "^1.0.2",
     "loader-utils": "^2.0.4"
   }
