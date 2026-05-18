@@ -39,7 +39,7 @@
     "to-string-loader": "^1.1.5",
     "webpack": "^5.104.1",
     "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.2.1"
+    "webpack-dev-server": "^5.2.4"
   },
   "resolutions": {
     "js-yaml": "4.1.1",
