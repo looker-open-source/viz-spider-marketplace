@@ -2,7 +2,7 @@
   "label": "Spider Visualization",
   "category_label": "Plug-ins",
   "branding": {
-    "image_uri": "https://marketplace-api.looker.com/visualization-screenshots/spider_icon.png",
+    "image_uri": "https://static-a.cdn.looker.app/marketplace/visualization-screenshots/spider_icon.png",
     "tagline": "Use the Spider Visualization to easily compare multiple measures at once and identify outliers or general trends."
   },
     "constants": {
