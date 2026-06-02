@@ -379,39 +379,27 @@ function RadarChart(
       .style("filter", "url(#glow)");
   } else {
     levels = [];
-    let labels = axisGrid.selectAll(".axisLabel").nodes(); // D3 v4+: gets native array of DOM elements
+    let labels = axisGrid.selectAll(".axisLabel").nodes();
 
-    if (cfg.independent) {
-      let n = labels.length / total;
+    let labelsToProcess = cfg.independent
+      ? labels.slice(0, labels.length / total)
+      : labels;
 
-      labels.slice(0, n).forEach(function (node) {
-        let set = [];
-        let r = parseInt(node.getAttribute("y"), 10);
+    labelsToProcess.forEach(function (node) {
+      let set = [];
+      let r = parseInt(node.getAttribute("y"), 10);
 
-        axis.each(function (axisData, i) {
-          let tempx = r * Math.cos(angleSlice * i - (Math.PI * 3) / 2);
-          let tempy = r * Math.sin(angleSlice * i - (Math.PI * 3) / 2);
-          set.push({ x: tempx, y: tempy });
-        });
-        levels.push(set);
-      });
-    } else {
-      labels.forEach(function (node) {
-        let set = [];
-        let r = parseInt(node.getAttribute("y"), 10);
-
-        axis.each(function (axisData, i) {
-          let tempx = r * Math.cos(angleSlice * i - (Math.PI * 3) / 2);
-          let tempy = r * Math.sin(angleSlice * i - (Math.PI * 3) / 2);
-          set.push({ x: tempx, y: tempy });
-        });
-        levels.push(set);
-      });
-    }
+      for (let i = 0; i < total; i++) {
+        let tempx = r * Math.cos(angleSlice * i - (Math.PI * 3) / 2);
+        let tempy = r * Math.sin(angleSlice * i - (Math.PI * 3) / 2);
+        set.push({ x: tempx, y: tempy });
+      }
+      levels.push(set);
+    });
 
     levels.forEach(function (d) {
       axisGrid
-        .selectAll(".levels-polygon") 
+        .selectAll(".levels-polygon")
         .data([d])
         .enter()
         .append("polygon")
@@ -702,19 +690,23 @@ function RadarChart(
       const legendCell = select(this);
       legendCell.classed("hidden", !legendCell.classed("hidden"));
 
-      let series_sel = select(`#v${d}`).node().classList.contains("hidden");
+      let series_sel = select("#v" + points).classed("hidden");
 
       if (series_sel) {
-        select(`#v${d}`).style("opacity", "0").style("pointer-events", "none");
-        selectAll(`[child_id=v${d}]`).style("pointer-events", "none");
-        selectAll(`[series_id=v${d}]`).style("pointer-events", "none");
+        select(`#v${points}`)
+          .style("opacity", "0")
+          .style("pointer-events", "none");
+        selectAll(`[child_id=v${points}]`).style("pointer-events", "none");
+        selectAll(`[series_id=v${points}]`).style("pointer-events", "none");
       } else {
-        select(`#v${d}`).style("opacity", "1").style("pointer-events", null);
-        selectAll(`[child_id=v${d}]`).style("pointer-events", "all");
-        selectAll(`[series_id=v${d}]`).style("pointer-events", "all");
+        select(`#v${points}`)
+          .style("opacity", "1")
+          .style("pointer-events", null);
+        selectAll(`[child_id=v${points}]`).style("pointer-events", "all");
+        selectAll(`[series_id=v${points}]`).style("pointer-events", "all");
       }
 
-      let legend_tru = legendCell.node().classList.contains("hidden");
+      let legend_tru = legendCell.classed("hidden");
 
       if (legend_tru) {
         select(this).style("opacity", ".2");
@@ -1156,7 +1148,19 @@ const visObject = {
           return;
         }
 
-        let qrn = queryResponse["fields"]["dimensions"][0].name;
+        let dimensions = queryResponse["fields"]["dimensions"];
+
+        if (!dimensions || dimensions.length === 0) {
+          this.addError({
+            title: "Dimension required.",
+            message: "This chart requires exactly 1 dimension.",
+          });
+          doneRendering();
+          return;
+        }
+
+        let qrn = dimensions[0].name;
+
         axes = [];
         queryResponse["fields"]["measure_like"].forEach(function (d) {
           axes.push({
