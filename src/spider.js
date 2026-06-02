@@ -4,9 +4,22 @@
  *  - API Documentation - https://github.com/looker/custom_visualizations_v2/blob/master/docs/api_reference.md
  *  - Example Visualizations - https://github.com/looker/custom_visualizations_v2/tree/master/src/examples
  **/
-import {scaleLinear, max, format, select, range, svg, selectAll, scaleOrdinal, schemeCategory10, lineRadial, symbol, symbolCircle } from 'd3';
-import * as d3 from 'd3';
-import { legendColor } from 'd3-svg-legend';
+import {
+  scaleLinear,
+  max,
+  format,
+  select,
+  range,
+  svg,
+  selectAll,
+  scaleOrdinal,
+  schemeCategory10,
+  lineRadial,
+  symbol,
+  symbolCircle,
+} from "d3";
+import * as d3 from "d3";
+import { legendColor } from "d3-svg-legend";
 
 function RadarChart(
   id,
@@ -16,7 +29,7 @@ function RadarChart(
   colorSeries,
   originalData,
   axes,
-  doneRendering
+  doneRendering,
 ) {
   let cfg = {
     w: 600, //Width of the circle
@@ -65,25 +78,25 @@ function RadarChart(
           return max(
             i.map(function (o) {
               return o.value;
-            })
+            }),
           );
-        })
+        }),
       )
     : max(data, function (i) {
         return max(
           i.map(function (o) {
             return o.value;
-          })
+          }),
         );
       });
   let deterSide = Math.min(cfg.w, cfg.h);
-	let allAxis = data[0].map(function (i, j) {
+  let allAxis = data[0].map(function (i, j) {
     return i.axis;
   }); //Names of each axis
   let total = allAxis.length, //The number of different axes
     radius = Math.min(
       deterSide * 0.35,
-      cfg.legendSide === "center" ? deterSide * 0.3 : deterSide * 0.45
+      cfg.legendSide === "center" ? deterSide * 0.3 : deterSide * 0.45,
     ), //Radius of the outermost circle
     Format = format(",.0f"), //Label formatting
     angleSlice = (Math.PI * 2) / total; //The width in radians of each "slice"
@@ -116,15 +129,15 @@ function RadarChart(
             return max(
               i.map(function (o) {
                 return o.value;
-              })
+              }),
             );
-          })
+          }),
         )
       : max(data, function (i) {
           return max(
             i.map(function (o) {
               return o.value;
-            })
+            }),
           );
         });
     allAxis.map(function (d) {
@@ -147,7 +160,7 @@ function RadarChart(
     .append("svg")
     .attr(
       "font-family",
-      `"Open Sans", "Noto Sans JP", "Noto Sans CJK KR", sans-serif`
+      `"Open Sans", "Noto Sans JP", "Noto Sans CJK KR", sans-serif`,
     )
     .attr("width", cfg.w)
     .attr("height", cfg.h + cfg.margin.bottom)
@@ -195,13 +208,13 @@ function RadarChart(
               "x",
               (dd / cfg.levels) *
                 radius *
-                Math.cos(angleSlice * i - Math.PI / 2)
+                Math.cos(angleSlice * i - Math.PI / 2),
             )
             .attr(
               "y",
               (dd / cfg.levels) *
                 radius *
-                Math.sin(angleSlice * i - Math.PI / 2)
+                Math.sin(angleSlice * i - Math.PI / 2),
             )
             .attr("dy", "0.35em")
             .attr("dy", "0.35em")
@@ -342,8 +355,9 @@ function RadarChart(
     })
     .call(wrap, cfg.wrapWidth);
 
-    let levels = [];
-    let s;
+  let levels = [];
+  let s;
+
   //Draw the background circles
   if (cfg.roundStrokes) {
     axisGrid
@@ -364,100 +378,68 @@ function RadarChart(
       .style("fill-opacity", cfg.opacityCircles)
       .style("filter", "url(#glow)");
   } else {
-    // let levels = [];
+    levels = [];
+    let labels = axisGrid.selectAll(".axisLabel").nodes(); // D3 v4+: gets native array of DOM elements
+
     if (cfg.independent) {
-      // levels = [];
-      axisGrid.selectAll(".axisLabel").forEach(function (d) {
-        s = d.length;
-        let n = s / total;
-        d.slice(0, n).forEach(function (d) {
-          set = [];
-          r = parseInt(d.getAttribute("y"));
-          axis[0].forEach(function (d, i) {
-            tempx = r * Math.cos(angleSlice * i - (Math.PI * 3) / 2);
-            tempy = r * Math.sin(angleSlice * i - (Math.PI * 3) / 2);
-            set.push({
-              x: tempx,
-              y: tempy,
-            });
-          });
-          levels.push(set);
+      let n = labels.length / total;
+
+      labels.slice(0, n).forEach(function (node) {
+        let set = [];
+        let r = parseInt(node.getAttribute("y"), 10);
+
+        axis.each(function (axisData, i) {
+          let tempx = r * Math.cos(angleSlice * i - (Math.PI * 3) / 2);
+          let tempy = r * Math.sin(angleSlice * i - (Math.PI * 3) / 2);
+          set.push({ x: tempx, y: tempy });
         });
-      });
-      levels.forEach(function (d) {
-        axisGrid
-          .selectAll(".levels")
-          .data([d])
-          .enter()
-          .append("polygon")
-          .attr("points", function (d) {
-            return d
-              .map(function (d) {
-                return [d.x, d.y].join(",");
-              })
-              .join(" ");
-          })
-          .attr("class", "gridCircle")
-          .style("fill", function (d, i) {
-            return cfg.backgroundColor;
-          })
-          .style("stroke", function (d, i) {
-            return cfg.axisColor;
-          })
-          .style("fill-opacity", cfg.opacityCircles)
-          .style("filter", "url(#glow)");
+        levels.push(set);
       });
     } else {
-      //levels = [];
-      axisGrid.selectAll(".axisLabel").forEach(function (d) {
-        s = d.length;
-        d.forEach(function (d) {
-          set = [];
-          r = parseInt(d.getAttribute("y"));
-          axis[0].forEach(function (d, i) {
-            tempx = r * Math.cos(angleSlice * i - (Math.PI * 3) / 2);
-            tempy = r * Math.sin(angleSlice * i - (Math.PI * 3) / 2);
-            set.push({
-              x: tempx,
-              y: tempy,
-            });
-          });
-          levels.push(set);
+      labels.forEach(function (node) {
+        let set = [];
+        let r = parseInt(node.getAttribute("y"), 10);
+
+        axis.each(function (axisData, i) {
+          let tempx = r * Math.cos(angleSlice * i - (Math.PI * 3) / 2);
+          let tempy = r * Math.sin(angleSlice * i - (Math.PI * 3) / 2);
+          set.push({ x: tempx, y: tempy });
         });
-      });
-      levels.forEach(function (d) {
-        axisGrid
-          .selectAll(".levels")
-          .data([d])
-          .enter()
-          .append("polygon")
-          .attr("points", function (d) {
-            return d
-              .map(function (d) {
-                return [d.x, d.y].join(",");
-              })
-              .join(" ");
-          })
-          .attr("class", "gridCircle")
-          .style("fill", function (d, i) {
-            return cfg.backgroundColor;
-          })
-          .style("stroke", function (d, i) {
-            return cfg.axisColor;
-          })
-          .style("fill-opacity", cfg.opacityCircles)
-          .style("filter", "url(#glow)");
+        levels.push(set);
       });
     }
+
+    levels.forEach(function (d) {
+      axisGrid
+        .selectAll(".levels-polygon") 
+        .data([d])
+        .enter()
+        .append("polygon")
+        .attr("points", function (d) {
+          return d
+            .map(function (p) {
+              return [p.x, p.y].join(",");
+            })
+            .join(" ");
+        })
+        .attr("class", "gridCircle")
+        .style("fill", function (d, i) {
+          return cfg.backgroundColor;
+        })
+        .style("stroke", function (d, i) {
+          return cfg.axisColor;
+        })
+        .style("fill-opacity", cfg.opacityCircles)
+        .style("filter", "url(#glow)");
+    });
   }
 
   /////////////////////////////////////////////////////////
   ///////////// Draw the radar chart blobs ////////////////
   /////////////////////////////////////////////////////////
 
-  //The radial line function
-  let radarLine = d3.lineRadial()
-    //.curve(d3.curveLinearClosed)
+  let radarLine = d3
+    .lineRadial()
     .angle(function (d, i) {
       return i * angleSlice;
     })
@@ -468,10 +450,10 @@ function RadarChart(
             ? d.value * 0.8
             : d.value
           : d.value < 0
-          ? 0
-          : d.value
+            ? 0
+            : d.value,
       );
-    })
+    });
 
   if (cfg.roundStrokes) {
     radarLine.curve(d3.curveCardinalClosed);
@@ -488,14 +470,16 @@ function RadarChart(
       return "v" + moreData[i].label.replace(/[^A-Z0-9]+/gi, "");
     });
 
-    //Append the backgrounds
+  //Append the backgrounds
   blobWrapper
     .append("path")
     .attr("class", "radarArea")
     .attr("id", function (d, i) {
       return "v" + moreData[i].label.replace(/[^A-Z0-9]+/gi, "");
     })
-    .attr("d", function(d,i) { return radarLine(data[i]) })
+    .attr("d", function (d, i) {
+      return radarLine(data[i]);
+    })
     .style("fill", function (d, i) {
       return cfg.color(i);
     })
@@ -521,7 +505,9 @@ function RadarChart(
   blobWrapper
     .append("path")
     .attr("class", "radarStroke")
-    .attr("d", function(d,i) { return radarLine(data[i]); })
+    .attr("d", function (d, i) {
+      return radarLine(data[i]);
+    })
     .style("stroke-width", cfg.strokeWidth + "px")
     .style("stroke", function (d, i) {
       return cfg.color(i);
@@ -546,8 +532,8 @@ function RadarChart(
               ? d.value * cfg.negativeR
               : d.value
             : d.value < 0
-            ? 0
-            : d.value
+              ? 0
+              : d.value,
         ) * Math.cos(angleSlice * i - Math.PI / 2)
       );
     })
@@ -559,8 +545,8 @@ function RadarChart(
               ? d.value * cfg.negativeR
               : d.value
             : d.value < 0
-            ? 0
-            : d.value
+              ? 0
+              : d.value,
         ) * Math.sin(angleSlice * i - Math.PI / 2)
       );
     })
@@ -605,8 +591,8 @@ function RadarChart(
               ? d.value * cfg.negativeR
               : d.value
             : d.value < 0
-            ? 0
-            : d.value
+              ? 0
+              : d.value,
         ) * Math.cos(angleSlice * i - Math.PI / 2)
       );
     })
@@ -618,8 +604,8 @@ function RadarChart(
               ? d.value * cfg.negativeR
               : d.value
             : d.value < 0
-            ? 0
-            : d.value
+              ? 0
+              : d.value,
         ) * Math.sin(angleSlice * i - Math.PI / 2)
       );
     })
@@ -712,9 +698,12 @@ function RadarChart(
     .on("cellclick", function (d) {
       let points = d.replace(/[^A-Z0-9]+/gi, "");
       toggleDataPoints(points);
+
       const legendCell = select(this);
-      legendCell.classed("hidden", !legendCell.classed("hidden")); // toggle opacity of legend item
-      let series_sel = select(`#v${d}`)[0][0].classList.contains("hidden");
+      legendCell.classed("hidden", !legendCell.classed("hidden"));
+
+      let series_sel = select(`#v${d}`).node().classList.contains("hidden");
+
       if (series_sel) {
         select(`#v${d}`).style("opacity", "0").style("pointer-events", "none");
         selectAll(`[child_id=v${d}]`).style("pointer-events", "none");
@@ -724,7 +713,9 @@ function RadarChart(
         selectAll(`[child_id=v${d}]`).style("pointer-events", "all");
         selectAll(`[series_id=v${d}]`).style("pointer-events", "all");
       }
-      legend_tru = legendCell[0][0].classList.contains("hidden");
+
+      let legend_tru = legendCell.node().classList.contains("hidden");
+
       if (legend_tru) {
         select(this).style("opacity", ".2");
       } else {
@@ -734,7 +725,7 @@ function RadarChart(
 
   _svg.select(".legendOrdinal").call(legendOrdinal);
 
-  let wid; 
+  let wid;
   if (cfg.legendSide == "center") {
     wid =
       window.innerWidth / 2 -
@@ -992,7 +983,16 @@ const visObject = {
    * UpdateAsync is the function that gets called (potentially) multiple times. It receives
    * the data and should update the visualization with the new data.
    **/
-  updateAsync: function (data, element, config, queryResponse, details, doneRendering) {
+  updateAsync: function (
+    data,
+    element,
+    config,
+    queryResponse,
+    details,
+    doneRendering,
+  ) {
+    this.clearErrors();
+
     if (data.length < 1) {
       this.addError({
         title: "No results.",
@@ -1017,7 +1017,7 @@ const visObject = {
       amount = parseInt((255 * amount) / 100);
       return (color = `#${addLight(color.substring(0, 2), amount)}${addLight(
         color.substring(2, 4),
-        amount
+        amount,
       )}${addLight(color.substring(4, 6), amount)}`);
     };
 
@@ -1050,200 +1050,234 @@ const visObject = {
 
     let originalData = data;
     let formattedData = [];
-    let axes = [], moreData = [];
+    let axes = [],
+      moreData = [];
     let series = [];
 
-    if (queryResponse["pivots"]) {
-      // grab the series labels
-      if (!(queryResponse["fields"]["measure_like"].length % 2) && config.negatives) {
-        //console.log("troof");
-        this.addError({
-          title: "Can't display negatives with symmetric axes.",
-          message: "Negatives can only be plotted on odd number of axes.",
+    try {
+      if (queryResponse["pivots"]) {
+        // grab the series labels
+        if (
+          !(queryResponse["fields"]["measure_like"].length % 2) &&
+          config.negatives
+        ) {
+          this.addError({
+            title: "Can't display negatives with symmetric axes.",
+            message: "Negatives can only be plotted on odd number of axes.",
+          });
+          doneRendering();
+          return;
+        }
+        if (queryResponse["fields"]["measure_like"].length < 3) {
+          this.addError({
+            title: "Multiple measures only.",
+            message: "This chart requires at least 3 measures.",
+          });
+          doneRendering();
+          return;
+        }
+        if (queryResponse["fields"]["dimensions"].length > 0) {
+          this.addError({
+            title: "Single dimension only.",
+            message:
+              "This chart accepts only 1, pivoted or unpivoted dimension.",
+          });
+          doneRendering();
+          return;
+        }
+        queryResponse["pivots"].forEach(function (d) {
+          series.push(d["key"]);
         });
-        return;
-      }
-      if (queryResponse["fields"]["measure_like"].length < 3) {
-        this.addError({
-          title: "Multiple measures only.",
-          message: "This chart requires at least 3 measures.",
-        });
-        return;
-      }
-      if (queryResponse["fields"]["dimensions"].length > 0) {
-        this.addError({
-          title: "Single dimension only.",
-          message: "This chart accepts only 1, pivoted or unpivoted dimension.",
-        });
-        return;
-      }
-      queryResponse["pivots"].forEach(function (d) {
-        series.push(d["key"]);
-      });
-      // format the data
-      // get measure-like field names and label
-      queryResponse["fields"]["measure_like"].forEach(function (d) {
-        axes.push({
-          name: d["name"],
-          label: d["label_short"].trim(),
-        });
-      });
-
-      series.forEach(function (s, index) {
-        let values = [];
-        axes.forEach(function (a) {
-          values.push({
-            axis: a["label"],
-            name: a["name"],
-            value: data[0][a["name"]][s]["value"],
-            rendered: data[0][a["name"]][s]["rendered"]
-              ? data[0][a["name"]][s]["rendered"]
-              : data[0][a["name"]][s]["value"],
-            links: data[0][a["name"]][s]["links"],
+        // format the data
+        // get measure-like field names and label
+        queryResponse["fields"]["measure_like"].forEach(function (d) {
+          axes.push({
+            name: d["name"],
+            label: d["label_short"].trim(),
           });
         });
-        let set = [];
+
+        series.forEach(function (s, index) {
+          let values = [];
+          axes.forEach(function (a) {
+            values.push({
+              axis: a["label"],
+              name: a["name"],
+              value: data[0][a["name"]][s]["value"],
+              rendered: data[0][a["name"]][s]["rendered"]
+                ? data[0][a["name"]][s]["rendered"]
+                : data[0][a["name"]][s]["value"],
+              links: data[0][a["name"]][s]["links"],
+            });
+          });
+          let set = [];
+          moreData = [];
+          values.forEach(function (v) {
+            set.push(v);
+          });
+          moreData.push({
+            label: s,
+            data: set,
+            color:
+              index < 9
+                ? series_default[index]
+                : lighten("#D13452", index * 1.7),
+          });
+          formattedData.push(set);
+        });
+      } else {
+        if (
+          !(queryResponse["fields"]["measure_like"].length % 2) &&
+          config.negatives
+        ) {
+          console.log("troof");
+          this.addError({
+            title: "Can't display negatives with symmetric axes.",
+            message: "Negatives can only be plotted on odd number of axes.",
+          });
+          doneRendering();
+          return;
+        }
+        if (queryResponse["fields"]["measure_like"].length < 3) {
+          this.addError({
+            title: "Multiple measures only.",
+            message: "This chart requires at least 3 measures.",
+          });
+          doneRendering();
+          return;
+        }
+        if (queryResponse["fields"]["dimension_like"].length > 1) {
+          this.addError({
+            title: "Single dimension only.",
+            message:
+              "This chart accepts only 1, pivoted or unpivoted dimension.",
+          });
+          doneRendering();
+          return;
+        }
+
+        let qrn = queryResponse["fields"]["dimensions"][0].name;
+        axes = [];
+        queryResponse["fields"]["measure_like"].forEach(function (d) {
+          axes.push({
+            name: d["name"],
+            label: d["label_short"]
+              ? d["label_short"].trim()
+              : d["label"].trim(),
+          });
+        });
         moreData = [];
-        values.forEach(function (v) {
-          set.push(v);
-        });
-        moreData.push({
-          label: s,
-          data: set,
-          color:
-            index < 9 ? series_default[index] : lighten("#D13452", index * 1.7),
-        });
-        formattedData.push(set);
-      });
-    } else {
-      if (!(queryResponse["fields"]["measure_like"].length % 2) && config.negatives) {
-        console.log("troof");
-        this.addError({
-          title: "Can't display negatives with symmetric axes.",
-          message: "Negatives can only be plotted on odd number of axes.",
-        });
-        return;
-      }
-      if (queryResponse["fields"]["measure_like"].length < 3) {
-        this.addError({
-          title: "Multiple measures only.",
-          message: "This chart requires at least 3 measures.",
-        });
-        return;
-      }
-      if (queryResponse["fields"]["dimension_like"].length > 1) {
-        this.addError({
-          title: "Single dimension only.",
-          message: "This chart accepts only 1, pivoted or unpivoted dimension.",
-        });
-        return;
-      }
-      
-      let qrn = queryResponse["fields"]["dimensions"][0].name;
-			axes = [];
-      queryResponse["fields"]["measure_like"].forEach(function (d) {
-        axes.push({
-          name: d["name"],
-          label: d["label_short"] ? d["label_short"].trim() : d["label"].trim(),
-        });
-      });
-      moreData = [];
-      data.forEach(function (d, index) {
-        let values = []
-        axes.forEach(function (a) {
-          values.push({
-            axis: a["label"],
-            name: a["name"],
-            value: d[a["name"]]["value"],
-            rendered: d[a["name"]]["rendered"]
-              ? d[a["name"]]["rendered"]
-              : d[a["name"]]["value"],
-            links: d[a["name"]]["links"],
+        data.forEach(function (d, index) {
+          let values = [];
+          axes.forEach(function (a) {
+            values.push({
+              axis: a["label"],
+              name: a["name"],
+              value: d[a["name"]]["value"],
+              rendered: d[a["name"]]["rendered"]
+                ? d[a["name"]]["rendered"]
+                : d[a["name"]]["value"],
+              links: d[a["name"]]["links"],
+            });
           });
+          let set = [];
+          values.forEach(function (v) {
+            set.push(v);
+          });
+          moreData.push({
+            label: String(d[qrn]["value"]),
+            data: set,
+            color:
+              index < 9
+                ? series_default[index]
+                : lighten("#D13452", index * 1.7),
+          });
+          formattedData.push(set);
         });
-        let set = [];
-        values.forEach(function (v) {
-          set.push(v);
-        });
-        moreData.push({
-          label: String(d[qrn]["value"]),
-          data: set,
-          color:
-            index < 9 ? series_default[index] : lighten("#D13452", index * 1.7),
-        });
-        formattedData.push(set);
+        series = moreData.map((s) => s.label);
+      }
+      //color: index < 9 ? series_default[index] : lighten("#D13452", index*1.7),
+      let opt = Object.assign({}, baseOptions);
+
+      moreData.forEach(function (s, index) {
+        opt[`${s.label}_color`] = {
+          type: `string`,
+          label: `${s.label} - Color`,
+          display: `color`,
+          section: "Series",
+          default: `${s.color}`,
+          //default: baseConfig[`${s.label}_color`] ? baseConfig[`${s.label}_color`] : [series_default[index]],
+        };
       });
-      series = moreData.map((s) => s.label);
-    }
-    //color: index < 9 ? series_default[index] : lighten("#D13452", index*1.7),
-    let opt = Object.assign({}, baseOptions);
+      this.trigger("registerOptions", opt);
 
-    moreData.forEach(function (s, index) {
-      opt[`${s.label}_color`] = {
-        type: `string`,
-        label: `${s.label} - Color`,
-        display: `color`,
-        section: "Series",
-        default: `${s.color}`,
-        //default: baseConfig[`${s.label}_color`] ? baseConfig[`${s.label}_color`] : [series_default[index]],
-      };
-    });
-    this.trigger("registerOptions", opt);
-
-    //let color = d3.scale.ordinal().range(moreData.map((d,index) => config[`${d.label}_color`] ? config[`${d.label}_color`] : [series_default[index]]));
-    let color = scaleOrdinal().range(
-      Object.keys(config)
-        .filter(function (key) {
-          return key.indexOf("_color") !== -1;
-        })
-        .map(function (d) {
-          return config[d];
-        })
-    );
-
-    let radarChartOptions1 = {};
-
-    if (config.levels) {
-      radarChartOptions1 = {
-        w: width,
-        h: height,
-        margin: margin,
-        maxValue: 0.5,
-        levels: config.levels,
-        roundStrokes: config.rounded_strokes,
-        color: color,
-        axisFont: config.axis_label_font,
-        scaleFont: config.axis_scale_font,
-        labelFactor: (config.label_factor * 1.5) / 100,
-        labelFine: config.label_fine * 1.2,
-        wrapWidth: config.wrap_width,
-        opacityArea: config.opacity_area / 100,
-        dotRadius: config.dot_radius / 5,
-        opacityCircles: config.opacity_circles / 200,
-        backgroundColor: config.backgroundColor,
-        axisColor: config.axis_color,
-        strokeWidth: config.stroke_width / 5,
-        legendSide: config.legend_side,
-        glow: config.glow / 20,
-        negatives: config.negatives,
-        axisColor: config.axisColor,
-        negativeR: config.negative_r,
-        independent: config.independent,
-        legendPad: config.legend_padding,
-        legendFont: config.legend_font,
-        domainMax: config.domain_max,
-        labelScale: config.labelScale,
-      };
-      RadarChart(
-        "#vis",
-        formattedData,
-        radarChartOptions1,
-        moreData,
-        [],
-        originalData,
-        axes,
-        doneRendering
+      //let color = d3.scale.ordinal().range(moreData.map((d,index) => config[`${d.label}_color`] ? config[`${d.label}_color`] : [series_default[index]]));
+      let color = scaleOrdinal().range(
+        Object.keys(config)
+          .filter(function (key) {
+            return key.indexOf("_color") !== -1;
+          })
+          .map(function (d) {
+            return config[d];
+          }),
       );
+
+      let radarChartOptions1 = {};
+
+      if (config.levels) {
+        radarChartOptions1 = {
+          w: width,
+          h: height,
+          margin: margin,
+          maxValue: 0.5,
+          levels: config.levels,
+          roundStrokes: config.rounded_strokes,
+          color: color,
+          axisFont: config.axis_label_font,
+          scaleFont: config.axis_scale_font,
+          labelFactor: (config.label_factor * 1.5) / 100,
+          labelFine: config.label_fine * 1.2,
+          wrapWidth: config.wrap_width,
+          opacityArea: config.opacity_area / 100,
+          dotRadius: config.dot_radius / 5,
+          opacityCircles: config.opacity_circles / 200,
+          backgroundColor: config.backgroundColor,
+          axisColor: config.axis_color,
+          strokeWidth: config.stroke_width / 5,
+          legendSide: config.legend_side,
+          glow: config.glow / 20,
+          negatives: config.negatives,
+          axisColor: config.axisColor,
+          negativeR: config.negative_r,
+          independent: config.independent,
+          legendPad: config.legend_padding,
+          legendFont: config.legend_font,
+          domainMax: config.domain_max,
+          labelScale: config.labelScale,
+        };
+        RadarChart(
+          "#vis",
+          formattedData,
+          radarChartOptions1,
+          moreData,
+          [],
+          originalData,
+          axes,
+          doneRendering,
+        );
+      } else {
+        doneRendering();
+      }
+    } catch (error) {
+      console.error("Spider Viz Rendering Error:", error);
+
+      this.addError({
+        title: "Visualization Error",
+        message:
+          "An unexpected error occurred while rendering the spider chart. Please check your data layout or options.",
+      });
+
+      doneRendering();
     }
   },
 };
