@@ -381,45 +381,46 @@ function RadarChart(
     levels = [];
     let labels = axisGrid.selectAll(".axisLabel").nodes();
 
-    let labelsToProcess = cfg.independent
-      ? labels.slice(0, labels.length / total)
-      : labels;
-
-    labelsToProcess.forEach(function (node) {
+    const getSetForRadius = (r) => {
       let set = [];
-      let r = parseInt(node.getAttribute("y"), 10);
-
       for (let i = 0; i < total; i++) {
         let tempx = r * Math.cos(angleSlice * i - (Math.PI * 3) / 2);
         let tempy = r * Math.sin(angleSlice * i - (Math.PI * 3) / 2);
         set.push({ x: tempx, y: tempy });
       }
-      levels.push(set);
+      return set;
+    };
+
+    let labelsToProcess = cfg.independent
+      ? labels.slice(0, labels.length / total)
+      : labels;
+
+    labelsToProcess.forEach(function (node) {
+      let r = parseInt(node.getAttribute("y"), 10);
+      levels.push(getSetForRadius(r));
     });
 
-    levels.forEach(function (d) {
-      axisGrid
-        .selectAll(".levels-polygon")
-        .data([d])
-        .enter()
-        .append("polygon")
-        .attr("points", function (d) {
-          return d
-            .map(function (p) {
-              return [p.x, p.y].join(",");
-            })
-            .join(" ");
-        })
-        .attr("class", "gridCircle")
-        .style("fill", function (d, i) {
-          return cfg.backgroundColor;
-        })
-        .style("stroke", function (d, i) {
-          return cfg.axisColor;
-        })
-        .style("fill-opacity", cfg.opacityCircles)
-        .style("filter", "url(#glow)");
-    });
+    axisGrid
+      .selectAll(".gridCircle.level-polygon")
+      .data(levels)
+      .enter()
+      .append("polygon")
+      .attr("class", "gridCircle level-polygon")
+      .attr("points", function (d) {
+        return d
+          .map(function (p) {
+            return [p.x, p.y].join(",");
+          })
+          .join(" ");
+      })
+      .style("fill", function (d, i) {
+        return cfg.backgroundColor;
+      })
+      .style("stroke", function (d, i) {
+        return cfg.axisColor;
+      })
+      .style("fill-opacity", cfg.opacityCircles)
+      .style("filter", "url(#glow)");
   }
 
   /////////////////////////////////////////////////////////
@@ -1215,15 +1216,10 @@ const visObject = {
       });
       this.trigger("registerOptions", opt);
 
-      //let color = d3.scale.ordinal().range(moreData.map((d,index) => config[`${d.label}_color`] ? config[`${d.label}_color`] : [series_default[index]]));
       let color = scaleOrdinal().range(
-        Object.keys(config)
-          .filter(function (key) {
-            return key.indexOf("_color") !== -1;
-          })
-          .map(function (d) {
-            return config[d];
-          }),
+        moreData.map(function (s) {
+          return config[`${s.label}_color`] || s.color;
+        }),
       );
 
       let radarChartOptions1 = {};
