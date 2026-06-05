@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/looker-open-source/viz-spider-marketplace/compare/v1.0.1...v1.0.2) (2026-06-05)
+
+
+### Bug Fixes
+
+* updating D3 selections to v4 syntax to fix rendering crashes, done callback update to mitigate rendering blank tiles ([#73](https://github.com/looker-open-source/viz-spider-marketplace/issues/73)) ([5c3a41b](https://github.com/looker-open-source/viz-spider-marketplace/commit/5c3a41b46ede0e33d41718fd540204f0c85ebb54))
+
 ## [1.0.1](https://github.com/looker-open-source/viz-spider-marketplace/compare/v1.0.0...v1.0.1) (2025-01-24)
 
 
