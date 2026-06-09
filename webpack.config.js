@@ -22,16 +22,7 @@ var webpackConfig = {
   },
   plugins: [new TerserPlugin()],
   module: {
-    rules: [
-      { test: /\.(js|jsx)$/, use: "babel-loader" },
-      {
-        test: /\.css$/i,
-        use: [
-          { loader: "style-loader", options: { injectType: "lazyStyleTag" } },
-          "css-loader",
-        ],
-      },
-    ],
+    rules: [{ test: /\.(js|jsx)$/, use: "babel-loader" }],
   },
   stats: {},
 };
