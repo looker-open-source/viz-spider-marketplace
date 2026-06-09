@@ -34,7 +34,7 @@ function RadarChart(
   colorSeries,
   originalData,
   axes,
-  doneRendering,
+  doneRendering
 ) {
   let cfg = {
     w: 600, //Width of the circle
@@ -83,15 +83,15 @@ function RadarChart(
           return max(
             i.map(function (o) {
               return o.value;
-            }),
+            })
           );
-        }),
+        })
       )
     : max(data, function (i) {
         return max(
           i.map(function (o) {
             return o.value;
-          }),
+          })
         );
       });
   let deterSide = Math.min(cfg.w, cfg.h);
@@ -101,7 +101,7 @@ function RadarChart(
   let total = allAxis.length, //The number of different axes
     radius = Math.min(
       deterSide * 0.35,
-      cfg.legendSide === "center" ? deterSide * 0.3 : deterSide * 0.45,
+      cfg.legendSide === "center" ? deterSide * 0.3 : deterSide * 0.45
     ), //Radius of the outermost circle
     Format = format(",.0f"), //Label formatting
     angleSlice = (Math.PI * 2) / total; //The width in radians of each "slice"
@@ -134,15 +134,15 @@ function RadarChart(
             return max(
               i.map(function (o) {
                 return o.value;
-              }),
+              })
             );
-          }),
+          })
         )
       : max(data, function (i) {
           return max(
             i.map(function (o) {
               return o.value;
-            }),
+            })
           );
         });
     allAxis.map(function (d) {
@@ -165,7 +165,7 @@ function RadarChart(
     .append("svg")
     .attr(
       "font-family",
-      `"Open Sans", "Noto Sans JP", "Noto Sans CJK KR", sans-serif`,
+      `"Open Sans", "Noto Sans JP", "Noto Sans CJK KR", sans-serif`
     )
     .attr("width", cfg.w)
     .attr("height", cfg.h + cfg.margin.bottom)
@@ -213,13 +213,13 @@ function RadarChart(
               "x",
               (dd / cfg.levels) *
                 radius *
-                Math.cos(angleSlice * i - Math.PI / 2),
+                Math.cos(angleSlice * i - Math.PI / 2)
             )
             .attr(
               "y",
               (dd / cfg.levels) *
                 radius *
-                Math.sin(angleSlice * i - Math.PI / 2),
+                Math.sin(angleSlice * i - Math.PI / 2)
             )
             .attr("dy", "0.35em")
             .attr("dy", "0.35em")
@@ -444,8 +444,8 @@ function RadarChart(
             ? d.value * 0.8
             : d.value
           : d.value < 0
-            ? 0
-            : d.value,
+          ? 0
+          : d.value
       );
     });
 
@@ -526,8 +526,8 @@ function RadarChart(
               ? d.value * cfg.negativeR
               : d.value
             : d.value < 0
-              ? 0
-              : d.value,
+            ? 0
+            : d.value
         ) * Math.cos(angleSlice * i - Math.PI / 2)
       );
     })
@@ -539,8 +539,8 @@ function RadarChart(
               ? d.value * cfg.negativeR
               : d.value
             : d.value < 0
-              ? 0
-              : d.value,
+            ? 0
+            : d.value
         ) * Math.sin(angleSlice * i - Math.PI / 2)
       );
     })
@@ -585,8 +585,8 @@ function RadarChart(
               ? d.value * cfg.negativeR
               : d.value
             : d.value < 0
-              ? 0
-              : d.value,
+            ? 0
+            : d.value
         ) * Math.cos(angleSlice * i - Math.PI / 2)
       );
     })
@@ -598,8 +598,8 @@ function RadarChart(
               ? d.value * cfg.negativeR
               : d.value
             : d.value < 0
-              ? 0
-              : d.value,
+            ? 0
+            : d.value
         ) * Math.sin(angleSlice * i - Math.PI / 2)
       );
     })
@@ -987,7 +987,7 @@ const visObject = {
     config,
     queryResponse,
     details,
-    doneRendering,
+    doneRendering
   ) {
     this.clearErrors();
 
@@ -1015,7 +1015,7 @@ const visObject = {
       amount = parseInt((255 * amount) / 100);
       return (color = `#${addLight(color.substring(0, 2), amount)}${addLight(
         color.substring(2, 4),
-        amount,
+        amount
       )}${addLight(color.substring(4, 6), amount)}`);
     };
 
@@ -1224,7 +1224,7 @@ const visObject = {
       let color = scaleOrdinal().range(
         moreData.map(function (s) {
           return config[`${s.label}_color`] || s.color;
-        }),
+        })
       );
 
       let radarChartOptions1 = {};
@@ -1268,7 +1268,7 @@ const visObject = {
           [],
           originalData,
           axes,
-          doneRendering,
+          doneRendering
         );
       } else {
         doneRendering();
