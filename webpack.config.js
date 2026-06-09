@@ -24,12 +24,12 @@ var webpackConfig = {
   module: {
     rules: [
       { test: /\.(js|jsx)$/, use: "babel-loader" },
-      { 
-        test: /\.css$/i, 
+      {
+        test: /\.css$/i,
         use: [
-          {loader: "style-loader", options: {injectType: 'lazyStyleTag'}},
-          "css-loader"
-        ]
+          { loader: "style-loader", options: { injectType: "lazyStyleTag" } },
+          "css-loader",
+        ],
       },
     ],
   },
