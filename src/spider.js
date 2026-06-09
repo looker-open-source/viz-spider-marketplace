@@ -630,7 +630,7 @@ function RadarChart(
     .on("click", function (d, i) {
       LookerCharts.Utils.openDrillMenu({
         links: d.links,
-        event: event,
+        event: d3.event,
       });
     })
     .on("mouseout", function () {
