@@ -11,8 +11,8 @@ var webpackConfig = {
     contentBase: __dirname,
   },
   output: {
-    filename: "bundle.js",
-    path: path.join(path.resolve(__dirname), "/dist"),
+    filename: "spider.js",
+    path: path.resolve(__dirname),
     library: "[name]",
     libraryTarget: "umd",
   },
@@ -22,16 +22,7 @@ var webpackConfig = {
   },
   plugins: [new TerserPlugin()],
   module: {
-    rules: [
-      { test: /\.(js|jsx)$/, use: "babel-loader" },
-      { 
-        test: /\.css$/i, 
-        use: [
-          {loader: "style-loader", options: {injectType: 'lazyStyleTag'}},
-          "css-loader"
-        ]
-      },
-    ],
+    rules: [{ test: /\.(js|jsx)$/, use: "babel-loader" }],
   },
   stats: {},
 };

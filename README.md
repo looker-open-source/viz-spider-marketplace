@@ -7,11 +7,11 @@ Great! Marketplace content -- including visualizations -- were designed for cont
 
 ### Interested in extending the visualization for your own use case?
 #### Quickstart Dev Instructions
-1.  **Install Dependecies.**
+1.  **Install Dependencies.**
 
-    Using yarn, install all dependencies
+    Using npm, install all dependencies
     ```
-    yarn
+    npm install
     ```
 2. **Make changes to the source code**
 
@@ -19,11 +19,11 @@ Great! Marketplace content -- including visualizations -- were designed for cont
 
     You need to compile your react code, let's run:
     ```
-    yarn build
+    npm run build
     ```
     Recommended: Webpack can detect changes and build automatically
      ```
-    yarn watch
+    npm run watch
     ```
     Your compiled code can be found in this repo.
 
@@ -41,7 +41,6 @@ Great! Marketplace content -- including visualizations -- were designed for cont
 
 **`README.md`**: This! A text file containing useful reference information about this visualization.
 
-**`yarn.lock`**: [Yarn](https://yarnpkg.com/) is a package manager alternative to npm. This file serves essentially the same purpose as `package-lock.json`, just for a different package management system.
 
 **`.babelrc`**: A configuration file for the Babel jsx -> js compiler.
 
