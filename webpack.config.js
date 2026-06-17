@@ -11,6 +11,7 @@ var webpackConfig = {
     contentBase: __dirname,
   },
   output: {
+    hashFunction: 'xxhash64',
     filename: "spider.js",
     path: path.resolve(__dirname),
     library: "[name]",
