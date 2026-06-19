@@ -8,9 +8,12 @@ var webpackConfig = {
     spider: "./src/spider.js",
   },
   devServer: {
-    contentBase: __dirname,
+    static: {
+      directory: __dirname,
+    },
   },
   output: {
+    hashFunction: 'sha256',
     filename: "spider.js",
     path: path.resolve(__dirname),
     library: "[name]",
