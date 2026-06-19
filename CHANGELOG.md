@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/looker-open-source/viz-spider-marketplace/compare/v1.0.2...v1.0.3) (2026-06-19)
+
+
+### Bug Fixes
+
+* fix build, Babel, manifest CDNs, and event scope ([#77](https://github.com/looker-open-source/viz-spider-marketplace/issues/77)) ([212725c](https://github.com/looker-open-source/viz-spider-marketplace/commit/212725c4151d61b96801e8c6084d02fb484ef7a3))
+
 ## [1.0.2](https://github.com/looker-open-source/viz-spider-marketplace/compare/v1.0.1...v1.0.2) (2026-06-05)
 
 
