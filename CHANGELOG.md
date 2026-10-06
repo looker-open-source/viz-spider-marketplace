@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.4](https://github.com/looker-open-source/viz-spider-marketplace/compare/v1.0.3...v1.0.4) (2026-10-06)
+
+
+### Bug Fixes
+
+* stabilize PDF rendering, add defensive guards, and format codebase ([#97](https://github.com/looker-open-source/viz-spider-marketplace/issues/97)) ([082d698](https://github.com/looker-open-source/viz-spider-marketplace/commit/082d69877504fe51e900afd28d68030bc3f2c8a0))
+
 ## [1.0.3](https://github.com/looker-open-source/viz-spider-marketplace/compare/v1.0.2...v1.0.3) (2026-06-19)
 
 
