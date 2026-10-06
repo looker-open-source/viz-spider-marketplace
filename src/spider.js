@@ -202,34 +202,43 @@ function RadarChart(
 
   //Text indicating at what % each level is
   if (cfg.independent) {
+    let axisLabelData = [];
     allAxis.forEach(function (d, i) {
       range(1, cfg.levels + 1)
         .reverse()
         .forEach(function (dd, ii) {
-          axisGrid
-            .append("text")
-            .attr("class", "axisLabel")
-            .attr(
-              "x",
-              (dd / cfg.levels) *
-                radius *
-                Math.cos(angleSlice * i - Math.PI / 2)
-            )
-            .attr(
-              "y",
-              (dd / cfg.levels) *
-                radius *
-                Math.sin(angleSlice * i - Math.PI / 2)
-            )
-            .attr("dy", "0.35em")
-            .attr("dy", "0.35em")
-            .style("font-size", `${cfg.labelScale ? cfg.scaleFont : 0}px`)
-            .style("font-weight", "900")
-            .style("z-index", 10)
-            .attr("fill", cfg.axisColor)
-            .text(Format((maxValue[i] * dd) / cfg.levels));
+          axisLabelData.push({ d: d, i: i, dd: dd, ii: ii });
         });
     });
+
+    axisGrid
+      .selectAll(".axisLabel.independent")
+      .data(axisLabelData)
+      .enter()
+      .append("text")
+      .attr("class", "axisLabel independent")
+      .attr("x", function (data) {
+        return (
+          (data.dd / cfg.levels) *
+          radius *
+          Math.cos(angleSlice * data.i - Math.PI / 2)
+        );
+      })
+      .attr("y", function (data) {
+        return (
+          (data.dd / cfg.levels) *
+          radius *
+          Math.sin(angleSlice * data.i - Math.PI / 2)
+        );
+      })
+      .attr("dy", "0.35em")
+      .style("font-size", `${cfg.labelScale ? cfg.scaleFont : 0}px`)
+      .style("font-weight", "900")
+      .style("z-index", 10)
+      .attr("fill", cfg.axisColor)
+      .text(function (data) {
+        return Format((maxValue[data.i] * data.dd) / cfg.levels);
+      });
   } else {
     axisGrid
       .selectAll(".axisLabel")
@@ -461,7 +470,7 @@ function RadarChart(
     .append("g")
     .attr("class", "radarWrapper")
     .attr("id", function (d, i) {
-      return "v" + moreData[i].label.replace(/[^A-Z0-9]+/gi, "");
+      return "v" + String(moreData[i].label).replace(/[^A-Z0-9]+/gi, "");
     });
 
   //Append the backgrounds
@@ -469,7 +478,7 @@ function RadarChart(
     .append("path")
     .attr("class", "radarArea")
     .attr("id", function (d, i) {
-      return "v" + moreData[i].label.replace(/[^A-Z0-9]+/gi, "");
+      return "v" + String(moreData[i].label).replace(/[^A-Z0-9]+/gi, "");
     })
     .attr("d", function (d, i) {
       return radarLine(data[i]);
@@ -478,7 +487,7 @@ function RadarChart(
       return cfg.color(i);
     })
     .style("fill-opacity", cfg.opacityArea)
-    .on("mouseover", function (d, i) {
+    .on("mouseover", function (event, d) {
       //Dim all blobs
       selectAll(".radarArea")
         .transition()
@@ -487,7 +496,7 @@ function RadarChart(
       //Bring back the hovered over blob
       select(this).transition().duration(200).style("fill-opacity", 0.7);
     })
-    .on("mouseout", function () {
+    .on("mouseout", function (event, d) {
       //Bring back all blobs
       selectAll(".radarArea")
         .transition()
@@ -561,7 +570,7 @@ function RadarChart(
     .append("g")
     .attr("class", "radarCircleWrapper")
     .attr("child_id", function (d, i) {
-      return "v" + moreData[i].label.replace(/[^A-Z0-9]+/gi, "");
+      return "v" + String(moreData[i].label).replace(/[^A-Z0-9]+/gi, "");
     });
 
   //Append a set of invisible circles on top for the mouseover pop-up
@@ -605,7 +614,7 @@ function RadarChart(
     })
     .style("fill", "none")
     .style("pointer-events", "all")
-    .on("mouseover", function (d, i) {
+    .on("mouseover", function (event, d) {
       let newX = parseFloat(select(this).attr("cx")) - 10;
       let newY = parseFloat(select(this).attr("cy")) - 10;
       selectAll(".radarArea")
@@ -627,13 +636,13 @@ function RadarChart(
         .style("pointer-events", "none")
         .style("opacity", 1);
     })
-    .on("click", function (d, i) {
+    .on("click", function (event, d) {
       LookerCharts.Utils.openDrillMenu({
         links: d.links,
-        event: d3.event,
+        event: event,
       });
     })
-    .on("mouseout", function () {
+    .on("mouseout", function (event, d) {
       tooltip.transition().duration(200).style("opacity", 0);
       selectAll(".radarArea")
         .transition()
@@ -663,12 +672,12 @@ function RadarChart(
     leg_orient = "vertical";
     leg_pad = cfg.legendPad + 0;
   } else if (cfg.legendSide === "right") {
-    legx = cfg.w * 1.25;
+    legx = Math.max(0, cfg.w - 120);
     legy = 20;
     leg_orient = "vertical";
     leg_pad = cfg.legendPad + 0;
   } else if (cfg.legendSide === "center") {
-    legy = window.innerHeight - 60;
+    legy = Math.max(0, cfg.h - 40);
     leg_orient = "horizontal";
     leg_pad = cfg.legendPad + 50;
   } else if (cfg.legendSide === "none") {
@@ -689,8 +698,14 @@ function RadarChart(
     .shapePadding(leg_pad)
     .scale(ordinal)
     .orient(leg_orient)
-    .on("cellclick", function (d) {
-      let points = d.replace(/[^A-Z0-9]+/gi, "");
+    .on("cellclick", function (event, d) {
+      let val =
+        typeof d === "string"
+          ? d
+          : d && typeof d === "object" && d.data
+          ? d.data
+          : String(d || "");
+      let points = String(val).replace(/[^A-Z0-9]+/gi, "");
       toggleDataPoints(points);
 
       const legendCell = select(this);
@@ -723,18 +738,24 @@ function RadarChart(
 
   _svg.select(".legendOrdinal").call(legendOrdinal);
 
+  let legendNode = select(".legendCells").node();
+  let legendWidth = 0;
+  if (legendNode && typeof legendNode.getBBox === "function") {
+    try {
+      legendWidth = legendNode.getBBox().width;
+    } catch (e) {
+      legendWidth = 0;
+    }
+  }
+
   let wid;
   if (cfg.legendSide == "center") {
-    wid =
-      window.innerWidth / 2 -
-      select(".legendCells").node().getBBox().width / 2 +
-      cfg.margin.left;
+    wid = Math.max(0, cfg.w / 2 - legendWidth / 2 + cfg.margin.left);
     select(".legendOrdinal").attr("transform", function (d) {
       return `translate(${wid},${legy})`;
     });
   } else if (cfg.legendSide == "right") {
-    wid =
-      window.innerWidth - select(".legendCells").node().getBBox().width * 1.25;
+    wid = Math.max(0, cfg.w - legendWidth * 1.1);
     select(".legendOrdinal").attr("transform", function (d) {
       return `translate(${wid},${legy})`;
     });
@@ -771,7 +792,18 @@ function RadarChart(
       while ((word = words.pop())) {
         line.push(word);
         tspan.text(line.join(" "));
-        if (tspan.node().getComputedTextLength() > width) {
+        let computedLen = 0;
+        if (
+          tspan.node() &&
+          typeof tspan.node().getComputedTextLength === "function"
+        ) {
+          try {
+            computedLen = tspan.node().getComputedTextLength();
+          } catch (e) {
+            computedLen = 0;
+          }
+        }
+        if (computedLen > width) {
           line.pop();
           tspan.text(line.join(" "));
           line = [word];
@@ -795,12 +827,6 @@ function RadarChart(
   doneRendering();
 } //RadarChart
 const baseOptions = {
-  levels: {
-    type: "number",
-    label: "Levels",
-    default: 4,
-    section: "Plot",
-  },
   label_factor: {
     type: "number",
     label: "Axis Label Padding",
@@ -962,8 +988,6 @@ const baseOptions = {
   },
 };
 
-let baseConfig = {};
-
 const visObject = {
   /**
    * Configuration options for your visualization. In Looker, these show up in the vis editor
@@ -974,7 +998,7 @@ const visObject = {
    * data is passed to it.
    **/
   create: function (element, config) {
-    element.innerHTML = `<div id='viz' style='font-family: "Open Sans", "Noto Sans JP", "Noto Sans", "Noto Sans CJK KR", Helvetica, Arial, sans-serif;'/>`;
+    element.innerHTML = `<div id='vis' style='width: 100%; height: 100%; font-family: "Open Sans", "Noto Sans JP", "Noto Sans", "Noto Sans CJK KR", Helvetica, Arial, sans-serif;'></div>`;
   },
 
   /**
@@ -991,17 +1015,19 @@ const visObject = {
   ) {
     this.clearErrors();
 
-    if (data.length < 1) {
+    if (!data || data.length < 1) {
       this.addError({
         title: "No results.",
         message: "",
       });
 
-      // Display no results message
-      select("#vis").text("No Results");
+      element.innerHTML = `<div id='vis' style='font-family: "Open Sans", sans-serif;'>No Results</div>`;
       doneRendering();
       return;
     }
+
+    element.innerHTML = `<div id='vis' style='width: 100%; height: 100%; font-family: "Open Sans", "Noto Sans JP", "Noto Sans", "Noto Sans CJK KR", Helvetica, Arial, sans-serif;'></div>`;
+
     // set the dimensions and margins of the graph
     const addLight = function (color, amount) {
       let cc = parseInt(color, 16) + amount;
@@ -1020,19 +1046,8 @@ const visObject = {
     };
 
     let margin = { top: 20, right: 20, bottom: 20, left: 20 },
-      width = element.clientWidth,
-      height = element.clientHeight;
-
-    // append the svg object to the body of the page
-    // append a 'group' element to 'svg'
-    // moves the 'group' element to the top left margin
-    element.innerHTML = "";
-    let svg = select("#vis")
-      .append("svg")
-      .attr("width", width)
-      .attr("height", height)
-      .append("g")
-      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+      width = element.clientWidth || 600,
+      height = element.clientHeight || 600;
 
     let series_default = [
       "#4A80BC",
@@ -1247,13 +1262,12 @@ const visObject = {
           dotRadius: config.dot_radius / 5,
           opacityCircles: config.opacity_circles / 200,
           backgroundColor: config.backgroundColor,
-          axisColor: config.axis_color,
+          axisColor: config.axisColor || config.axis_color,
           strokeWidth: config.stroke_width / 5,
           legendSide: config.legend_side,
           glow: config.glow / 20,
           negatives: config.negatives,
-          axisColor: config.axisColor,
-          negativeR: config.negative_r,
+          negativeR: config.negative_r || 0.81,
           independent: config.independent,
           legendPad: config.legend_padding,
           legendFont: config.legend_font,
